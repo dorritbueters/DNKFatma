@@ -1,1 +1,180 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>De Kluis Ervaring - Introductie</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #1a1a1a; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0;}
+        
+        #phone-container { width: 100%; height: 100%; max-width: 400px; max-height: 850px; background-color: #000; position: relative; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        @media (min-width: 500px) { #phone-container { border-radius: 40px; height: 90vh; border: 8px solid #333; } }
 
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; opacity: 0; transition: opacity 0.5s ease; background: white; color: black; }
+        .screen.active { display: flex; opacity: 1; z-index: 10; }
+        
+        /* Animaties */
+        .wave-bar { width: 6px; background: var(--wave-color, white); border-radius: 3px; animation: wave 1s infinite ease-in-out; }
+        @keyframes wave { 0%, 100% { height: 10px; opacity: 0.5; } 50% { height: 40px; opacity: 1; } }
+        
+        /* Pulsende Audio Indicator */
+        .audio-pulse { animation: audio-pulse-anim 1.5s infinite ease-in-out; }
+        @keyframes audio-pulse-anim { 
+            0% { transform: scale(0.9); box-shadow: 0 0 20px rgba(255,255,255,0.2); background-color: #333; } 
+            50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(255,255,255,0.6); background-color: #555; } 
+            100% { transform: scale(0.9); box-shadow: 0 0 20px rgba(255,255,255,0.2); background-color: #333; } 
+        }
+    </style>
+</head>
+<body>
+
+<div id="phone-container">
+
+    <!-- 1. OORDOPJES CHECK -->
+    <div id="screen-earbuds" class="screen active bg-black text-white items-center justify-center p-8 text-center">
+        <div class="text-6xl mb-6 animate-bounce">🎧</div>
+        <h1 class="text-2xl font-bold mb-4">Verbind je oordopjes met je telefoon</h1>
+        <p class="text-gray-400 mb-8 text-sm">Deze ervaring bevat audio. Sluit je oordopjes aan en doe beide een oortje in.</p>
+        <button onclick="goToAudioTest()" class="bg-white text-black px-8 py-3 rounded-full font-bold active:scale-95 transition">We hebben onze oordopjes in</button>
+    </div>
+
+    <!-- 2. AUDIO TEST -->
+    <div id="screen-test" class="screen bg-gray-900 text-white items-center justify-center p-8 text-center">
+        <h2 class="text-xl font-bold mb-6">Geluidstest</h2>
+        <div class="flex gap-2 h-16 items-center justify-center mb-8" style="--wave-color: #00ff41;">
+            <div class="wave-bar" style="animation-delay:0.1s"></div><div class="wave-bar" style="animation-delay:0.3s"></div><div class="wave-bar" style="animation-delay:0.5s"></div><div class="wave-bar" style="animation-delay:0.2s"></div>
+        </div>
+        <p class="text-gray-300 mb-8">Hoor je nu piepjes afspelen?</p>
+        <div class="flex gap-4 w-full justify-center">
+            <button onclick="playTestAudio()" class="bg-gray-700 text-white px-6 py-3 rounded-lg font-medium">Nee, test opnieuw</button>
+            <button onclick="startExperience()" class="bg-green-600 text-white px-6 py-3 rounded-lg font-bold">Ja, start de ervaring!</button>
+        </div>
+    </div>
+
+    <!-- 3. INTRO AUDIO (Persona praat) -->
+    <div id="screen-intro" class="screen bg-black text-white items-center justify-center p-8 text-center">
+        <!-- Abstracte pulserende cirkel -->
+        <div id="audio-indicator" class="w-24 h-24 bg-gray-700 rounded-full mb-8 shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all duration-300"></div>
+        
+        <h2 id="persona-name-display" class="text-2xl font-light mb-4">...</h2>
+        <p id="talking-status" class="text-gray-400 text-sm mb-8">Aan het praten...</p>
+        
+        <div class="flex gap-2 h-10 items-center justify-center" style="--wave-color: #fff;">
+            <div class="wave-bar" style="animation-delay:0.1s"></div><div class="wave-bar" style="animation-delay:0.3s"></div><div class="wave-bar" style="animation-delay:0.5s"></div>
+        </div>
+    </div>
+
+    <!-- 4. QR INSTRUCTIE -->
+    <div id="screen-walk" class="screen bg-black text-white items-center justify-center p-8 text-center">
+        <div class="text-5xl mb-6">🚶‍♂️</div>
+        <h2 class="text-2xl font-bold mb-2">Naar de website</h2>
+        <p class="text-gray-400 mb-8">Loop nu naar de website in de expositie en scan de QR-code met je QR-code scanner.</p>
+    </div>
+
+</div>
+
+<script>
+    // ============================================================================
+    // CONFIGURATIE - DEEL 1 (Introductie)
+    // ============================================================================
+    const CONFIG = {
+        testAudioDuration: 5000, // Zet op 0 voor de daadwerkelijke expositie!
+        
+        // 1. NAAM AANPASSEN PER PERSONA
+        personaName: "Fatma Yilmaz",
+        
+        // 2. AUDIO KOPPELEN PER PERSONA
+        // Vul hieronder de exacte bestandsnaam in van je MP3-bestand in Github
+        audioIntroSrc: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" 
+    };
+    // ============================================================================
+
+    let audioCtx;
+    let beepInterval;
+    const audioIntro = new Audio(CONFIG.audioIntroSrc);
+
+    function playTone() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.start(now); osc.stop(now + 0.2);
+    }
+
+    function startBeeps() {
+        if(beepInterval) clearInterval(beepInterval);
+        playTone(); // Eerste piep direct
+        beepInterval = setInterval(playTone, 1000); // Elke seconde een piep
+    }
+
+    function stopBeeps() {
+        if(beepInterval) clearInterval(beepInterval);
+    }
+
+    function unlockAudio() {
+        audioIntro.play().then(() => audioIntro.pause()).catch(e => console.log("Audio unlock:", e));
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    // --- FLOW ---
+    function goToAudioTest() {
+        unlockAudio(); 
+        showScreen('screen-test');
+        startBeeps();
+    }
+
+    function playTestAudio() { 
+        // Bij nee, test opnieuw
+        startBeeps(); 
+    }
+
+    function startExperience() {
+        stopBeeps(); // Stop het testgeluid
+        
+        document.getElementById('persona-name-display').innerText = CONFIG.personaName;
+        showScreen('screen-intro');
+        
+        // Start pulserende animatie op de cirkel
+        document.getElementById('audio-indicator').classList.add('audio-pulse');
+        
+        audioIntro.currentTime = 0;
+        
+        // Catch om fouten met missende audiobestanden in preview af te vangen
+        audioIntro.play().catch(e => {
+            console.warn("Audio kon niet worden afgespeeld (mogelijk ontbrekend bestand):", e);
+            if(CONFIG.testAudioDuration === 0) {
+                setTimeout(finishIntro, 5000); // Nood-fallback van 5 sec als er geen bestand is
+            }
+        });
+        
+        if (CONFIG.testAudioDuration > 0) {
+            setTimeout(() => {
+                audioIntro.pause();
+                finishIntro();
+            }, CONFIG.testAudioDuration);
+        } else {
+            audioIntro.onended = () => { finishIntro(); };
+        }
+    }
+
+    function finishIntro() {
+        document.getElementById('audio-indicator').classList.remove('audio-pulse');
+        document.getElementById('talking-status').innerText = "Audio afgerond";
+        showScreen('screen-walk');
+    }
+
+</script>
+</body>
+</html>
