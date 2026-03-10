@@ -2,16 +2,45 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>De Kluis Ervaring - Introductie</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>De Kluis Ervaring - Introductie (Fatma)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #1a1a1a; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0;}
+        body { 
+            /* Zwarte achtergrond op mobiel voorkomt lelijke randen bij overscroll */
+            background-color: #000; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            overflow: hidden; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0;
+            -webkit-tap-highlight-color: transparent; /* Voorkom blauwe knipperingen op mobiel */
+        }
         
-        #phone-container { width: 100%; height: 100%; max-width: 400px; max-height: 850px; background-color: #000; position: relative; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
-        @media (min-width: 500px) { #phone-container { border-radius: 40px; height: 90vh; border: 8px solid #333; } }
+        /* Telefoon Frame - Altijd Fullscreen */
+        #phone-container { 
+            width: 100%; 
+            height: 100vh; /* Fallback */
+            height: 100dvh; /* Dynamische hoogte voor negeren browserbalken */
+            background-color: #000; 
+            position: relative; 
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+        }
 
-        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; opacity: 0; transition: opacity 0.5s ease; background: white; color: black; }
+        .screen { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            display: none; flex-direction: column; opacity: 0; transition: opacity 0.5s ease; 
+            color: white; 
+            /* P-8 (2rem) vervanging met ondersteuning voor iPhone notch/eiland en home-bar */
+            padding-top: calc(2rem + env(safe-area-inset-top, 0px));
+            padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+            padding-left: calc(2rem + env(safe-area-inset-left, 0px));
+            padding-right: calc(2rem + env(safe-area-inset-right, 0px));
+        }
         .screen.active { display: flex; opacity: 1; z-index: 10; }
         
         /* Animaties */
@@ -32,7 +61,7 @@
 <div id="phone-container">
 
     <!-- 1. OORDOPJES CHECK -->
-    <div id="screen-earbuds" class="screen active bg-black text-white items-center justify-center p-8 text-center">
+    <div id="screen-earbuds" class="screen active bg-black items-center justify-center text-center">
         <div class="text-6xl mb-6 animate-bounce">🎧</div>
         <h1 class="text-2xl font-bold mb-4">Verbind je oordopjes met je telefoon</h1>
         <p class="text-gray-400 mb-8 text-sm">Deze ervaring bevat audio. Sluit je oordopjes aan en doe beide een oortje in.</p>
@@ -40,7 +69,7 @@
     </div>
 
     <!-- 2. AUDIO TEST -->
-    <div id="screen-test" class="screen bg-gray-900 text-white items-center justify-center p-8 text-center">
+    <div id="screen-test" class="screen bg-gray-900 items-center justify-center text-center">
         <h2 class="text-xl font-bold mb-6">Geluidstest</h2>
         <div class="flex gap-2 h-16 items-center justify-center mb-8" style="--wave-color: #00ff41;">
             <div class="wave-bar" style="animation-delay:0.1s"></div><div class="wave-bar" style="animation-delay:0.3s"></div><div class="wave-bar" style="animation-delay:0.5s"></div><div class="wave-bar" style="animation-delay:0.2s"></div>
@@ -53,12 +82,12 @@
     </div>
 
     <!-- 3. INTRO AUDIO (Persona praat) -->
-    <div id="screen-intro" class="screen bg-black text-white items-center justify-center p-8 text-center">
+    <div id="screen-intro" class="screen bg-black items-center justify-center text-center">
         <!-- Abstracte pulserende cirkel -->
         <div id="audio-indicator" class="w-24 h-24 bg-gray-700 rounded-full mb-8 shadow-[0_0_20px_rgba(255,255,255,0.2)] transition-all duration-300"></div>
         
         <h2 id="persona-name-display" class="text-2xl font-light mb-4">...</h2>
-        <p id="talking-status" class="text-gray-400 text-sm mb-8">Aan het praten...</p>
+        <p id="talking-status" class="text-gray-400 text-sm mb-8">Audio start zo...</p>
         
         <div class="flex gap-2 h-10 items-center justify-center" style="--wave-color: #fff;">
             <div class="wave-bar" style="animation-delay:0.1s"></div><div class="wave-bar" style="animation-delay:0.3s"></div><div class="wave-bar" style="animation-delay:0.5s"></div>
@@ -66,7 +95,7 @@
     </div>
 
     <!-- 4. QR INSTRUCTIE -->
-    <div id="screen-walk" class="screen bg-black text-white items-center justify-center p-8 text-center">
+    <div id="screen-walk" class="screen bg-black items-center justify-center text-center">
         <div class="text-5xl mb-6">🚶‍♂️</div>
         <h2 class="text-2xl font-bold mb-2">Tijd om een afspraak te maken</h2>
         <p class="text-gray-400 mb-8">Vanaf nu staan jullie in Fatma haar schoenen! Loop nu door naar de website en scan de QR-code om een afspraak voor Fatma in te plannen.</p>
@@ -144,29 +173,34 @@
         stopBeeps(); // Stop het testgeluid
         
         document.getElementById('persona-name-display').innerText = CONFIG.personaName;
+        document.getElementById('talking-status').innerText = "Audio start zo..."; // Pre-delay tekst
         showScreen('screen-intro');
-        
-        // Start pulserende animatie op de cirkel
-        document.getElementById('audio-indicator').classList.add('audio-pulse');
         
         audioIntro.currentTime = 0;
         
-        // Catch om fouten met missende audiobestanden in preview af te vangen
-        audioIntro.play().catch(e => {
-            console.warn("Audio kon niet worden afgespeeld (mogelijk ontbrekend bestand):", e);
-            if(CONFIG.testAudioDuration === 0) {
-                setTimeout(finishIntro, 5000); // Nood-fallback van 5 sec als er geen bestand is
+        // --- DELAY VAN 1.5 SECONDE TOEGEVOEGD ---
+        setTimeout(() => {
+            // Start pulserende animatie op de cirkel ná de delay
+            document.getElementById('audio-indicator').classList.add('audio-pulse');
+            document.getElementById('talking-status').innerText = "Aan het praten...";
+            
+            // Catch om fouten met missende audiobestanden in preview af te vangen
+            audioIntro.play().catch(e => {
+                console.warn("Audio kon niet worden afgespeeld (mogelijk ontbrekend bestand):", e);
+                if(CONFIG.testAudioDuration === 0) {
+                    setTimeout(finishIntro, 5000); // Nood-fallback van 5 sec als er geen bestand is
+                }
+            });
+            
+            if (CONFIG.testAudioDuration > 0) {
+                setTimeout(() => {
+                    audioIntro.pause();
+                    finishIntro();
+                }, CONFIG.testAudioDuration);
+            } else {
+                audioIntro.onended = () => { finishIntro(); };
             }
-        });
-        
-        if (CONFIG.testAudioDuration > 0) {
-            setTimeout(() => {
-                audioIntro.pause();
-                finishIntro();
-            }, CONFIG.testAudioDuration);
-        } else {
-            audioIntro.onended = () => { finishIntro(); };
-        }
+        }, 1500); // 1500 milliseconden = 1,5 seconde
     }
 
     function finishIntro() {
